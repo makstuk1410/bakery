@@ -374,6 +374,9 @@ def search():
     
     return jsonify(customers)
 
-if __name__ == '__main__':
+@app.before_first_request
+def setup_db():
     init_db()
+
+if __name__ == '__main__':
     app.run(debug=True, use_reloader=False, threaded=False)
