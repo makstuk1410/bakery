@@ -1,14 +1,14 @@
 from flask import Flask, render_template, request, jsonify
-import psycopg2
-import psycopg2.extras
+import psycopg
 import os
 
 app = Flask(__name__)
 DATABASE_URL = os.environ.get('DATABASE_URL', 'postgresql://localhost/bakery')
 
 def get_db():
-    conn = psycopg2.connect(DATABASE_URL)
-    conn.set_session(autocommit=False)
+    # psycopg 3 connect
+    conn = psycopg.connect(DATABASE_URL)
+    conn.autocommit = False
     return conn
 
 def dict_from_row(cursor, row):
