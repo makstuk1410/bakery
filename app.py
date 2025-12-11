@@ -29,9 +29,17 @@ def init_db():
             id SERIAL PRIMARY KEY,
             name TEXT NOT NULL,
             phone TEXT NOT NULL,
-            delivery_date TEXT NOT NULL DEFAULT '23.12'
+            delivery_date TEXT NOT NULL DEFAULT '23.12',
+            notes TEXT DEFAULT ''
         )
     ''')
+    
+    # Dodaj kolumnę notes jeśli nie istnieje (dla istniejących baz)
+    try:
+        cursor.execute('ALTER TABLE customers ADD COLUMN IF NOT EXISTS notes TEXT DEFAULT \'\'')
+        conn.commit()
+    except Exception:
+        pass
     
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS products (
@@ -110,6 +118,7 @@ def add_customer():
     name = data.get('name')
     phone = data.get('phone')
     delivery_date = data.get('delivery_date', '23.12')
+    notes = data.get('notes', '')
     
     if not name or not phone:
         return jsonify({'error': 'Imię i telefon są wymagane'}), 400
@@ -117,14 +126,26 @@ def add_customer():
     try:
         conn = get_db()
         cursor = conn.cursor()
-        cursor.execute('INSERT INTO customers (name, phone, delivery_date) VALUES (%s, %s, %s) RETURNING id', (name, phone, delivery_date))
+        cursor.execute('INSERT INTO customers (name, phone, delivery_date, notes) VALUES (%s, %s, %s, %s) RETURNING id', (name, phone, delivery_date, notes))
         customer_id = cursor.fetchone()[0]
         conn.commit()
         conn.close()
-        return jsonify({'id': customer_id, 'name': name, 'phone': phone, 'delivery_date': delivery_date})
+        return jsonify({'id': customer_id, 'name': name, 'phone': phone, 'delivery_date': delivery_date, 'notes': notes})
     except Exception as e:
         conn.close()
         return jsonify({'error': 'Klient z tym numerem już istnieje w tym dniu'}), 400
+
+@app.route('/customer/<int:customer_id>/update', methods=['PUT'])
+def update_customer(customer_id):
+    data = request.json
+    notes = data.get('notes', '')
+    
+    conn = get_db()
+    cursor = conn.cursor()
+    cursor.execute('UPDATE customers SET notes = %s WHERE id = %s', (notes, customer_id))
+    conn.commit()
+    conn.close()
+    return jsonify({'success': True})
 
 @app.route('/customer/<int:customer_id>/delete', methods=['DELETE'])
 def delete_customer(customer_id):
@@ -168,6 +189,7 @@ def get_customer_details(customer_id):
         'id': customer['id'],
         'name': customer['name'],
         'phone': customer['phone'],
+        'notes': customer.get('notes', ''),
         'orders': orders,
         'total_price': total_price
     })

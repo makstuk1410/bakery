@@ -328,6 +328,16 @@ function openCustomerModal(id) {
         info.innerHTML = `<strong>${data.name}</strong><div class="muted">${data.phone}</div>`;
         box.appendChild(info);
         
+        // Notatki
+        const notesBox = document.createElement('div');
+        notesBox.style.cssText = 'margin-top:12px; padding:10px; background:#f0f9ff; border:1px solid #bae6fd; border-radius:8px;';
+        notesBox.innerHTML = `
+            <div style="font-weight:600; margin-bottom:6px;">Notatki:</div>
+            <textarea id="customerNotes" style="width:100%; padding:8px; border:1px solid #cbd5e1; border-radius:6px; font-size:14px; font-family:inherit; min-height:60px;">${data.notes || ''}</textarea>
+            <button class="btn" style="margin-top:6px;" onclick="saveNotes()">Zapisz notatki</button>
+        `;
+        box.appendChild(notesBox);
+        
         // Wyświetl sumę wartości nieodebranych zamówień
         if (data.total_price > 0) {
             const priceInfo = document.createElement('div');
@@ -422,6 +432,20 @@ function addOrdersToCustomer() {
         loadCustomerStatus();
         loadProducts();
     }).catch(() => alert('Błąd połączenia'));
+}
+
+function saveNotes() {
+    if (!currentCustomerId) return;
+    const notes = document.getElementById('customerNotes').value;
+    api(`/customer/${currentCustomerId}/update`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ notes })
+    }).then(data => {
+        if (data.success) {
+            alert('Notatki zapisane');
+        }
+    });
 }
 
 function markDelivered(id) {
