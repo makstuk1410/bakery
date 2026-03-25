@@ -70,22 +70,23 @@ def init_db():
     
     if cnt == 0:
         default_products = [
-            ('Ciasto pom.', 40),
-            ('Forma przenno-żytnia', 17),
-            ('Forma pszenno-orkiszowa', 17),
-            ('Makowiec Austriacki', 60),
-            ('Panettone 300', 50),
-            ('Panettone 500', 70),
-            ('Pszenno-orkiszowy', 12),
-            ('Pszenno-żytni', 12),
-            ('Pszenny czysty', 12),
-            ('Pszenny z makiem', 12),
-            ('Pszenny z sezamem', 12),
-            ('Sernik nowojorski', 65),
-            ('Stollen z wiśnią', 45),
-            ('Strucla', 45),
-            ('Zytni czysty', 17),
-            ('Żytni z ziarnami', 17)
+            ('pszenny czysty', 13),
+            ('pszenny mak', 13),
+            ('pszenny sezam', 13),
+            ('pszenno-żytni', 13),
+            ('pszenno-orkiszowy', 13),
+            ('foremowy duży pszenno-żytni', 18),
+            ('foremowy duży pszenno-orkiszowy', 18),
+            ('foremowy żytni 100% z ziarnami', 18),
+            ('foremowy żytni 100% czysty', 18),
+            ('mazurek z mleczną czekoladą i maliną', 45),
+            ('babka piaskowa z pistacją', 45),
+            ('hot cross buns 2 szt', 17),
+            ('hot cross buns 4 szt', 30),
+            ('panettone 300g', 50),
+            ('panettone 500g', 70),
+            ('karpatka', 45),
+            ('pascha twarogowa (gluten free)', 40)
         ]
         for name, price in default_products:
             try:
@@ -313,17 +314,18 @@ def get_products():
 @app.route('/products/ensure-defaults', methods=['POST', 'GET'])
 def ensure_default_products():
     default_products = [
-        'Pszenny czysty', 'Pszenny z makiem', 'Pszenny z sezamem',
-        'Pszenno-żytni', 'Pszenno-orkiszowy', 'Forma przenno-żytnia',
-        'Forma pszenno-orkiszowa', 'Żytni z ziarnami', 'Zytni czysty',
-        'Makowiec Austriacki', 'Sernik nowojorski', 'Strucla',
-        'Ciasto pom.', 'Stollen z wiśnią', 'Panettone 300', 'Panettone 500'
+        ('pszenny czysty', 13), ('pszenny mak', 13), ('pszenny sezam', 13),
+        ('pszenno-żytni', 13), ('pszenno-orkiszowy', 13), ('foremowy duży pszenno-żytni', 18),
+        ('foremowy duży pszenno-orkiszowy', 18), ('foremowy żytni 100% z ziarnami', 18), ('foremowy żytni 100% czysty', 18),
+        ('mazurek z mleczną czekoladą i maliną', 45), ('babka piaskowa z pistacją', 45),
+        ('hot cross buns 2 szt', 17), ('hot cross buns 4 szt', 30), ('panettone 300g', 50), ('panettone 500g', 70),
+        ('karpatka', 45), ('pascha twarogowa (gluten free)', 40)
     ]
     conn = get_db()
     cursor = conn.cursor()
-    for p in default_products:
+    for name, price in default_products:
         try:
-            cursor.execute('INSERT INTO products (name) VALUES (%s)', (p,))
+            cursor.execute('INSERT INTO products (name, price) VALUES (%s, %s)', (name, price))
         except Exception:
             pass
     conn.commit()
